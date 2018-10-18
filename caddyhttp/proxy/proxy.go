@@ -299,18 +299,19 @@ func (p Proxy) match(r *http.Request) Upstream {
 func createUpstreamRequest(rw http.ResponseWriter, r *http.Request) (*http.Request, context.CancelFunc) {
 	// Original incoming server request may be canceled by the
 	// user or by std lib(e.g. too many idle connections).
-	ctx, cancel := context.WithCancel(r.Context())
-	if cn, ok := rw.(http.CloseNotifier); ok {
-		notifyChan := cn.CloseNotify()
-		go func() {
-			select {
-			case <-notifyChan:
-				cancel()
-			case <-ctx.Done():
-			}
-		}()
-	}
+	// ctx, cancel := context.WithCancel(r.Context())
+	// if cn, ok := rw.(http.CloseNotifier); ok {
+	// 	notifyChan := cn.CloseNotify()
+	// 	go func() {
+	// 		select {
+	// 		case <-notifyChan:
+	// 			cancel()
+	// 		case <-ctx.Done():
+	// 		}
+	// 	}()
+	// }
 
+	ctx, cancel := context.WithCancel(context.Background())
 	outreq := r.WithContext(ctx) // includes shallow copies of maps, but okay
 
 	// We should set body to nil explicitly if request body is empty.
